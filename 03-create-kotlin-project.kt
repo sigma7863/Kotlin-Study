@@ -7,7 +7,7 @@ package com.example.kotlinproject
 
 // アプリケーションの入り口
 fun main() {
-    println("Hello, world!")
+    // println("Hello World!")
 }
 /*
   main関数は
