@@ -19,6 +19,9 @@ fun main() {
 // val: value の省略形。「値」という意味。
 // var: variable の省略形。「変数、可変の」という意味。
 
+// 変数名は小文字で始めて、区切りは大文字で書く(キャメル型)
+// 例) message, name, lastName, myLastName
+
 // 型が異なっていたとしても同じ変数名を使うことはできない
 val age: String = "30"
 val age: Int = 30
@@ -35,15 +38,15 @@ val null: String = "空っぽ"
 // 型には以下のようなものがあります。
 
 // 型	    値	                   例
-// String	文字列	               "こんにちは"
-// Boolean	真 または 偽	           true または false
-// Char	    ２バイトの文字（Unicode） 'あ', 'X', 12354
-// Byte	    １バイトの整数	       -128〜127
-// Short	２バイトの整数	       -32768〜32767
-// Int	    ４バイトの整数		   -2147483648〜2147483647
-// Long	    ８バイトの整数		   -9223372036854775808〜9223372036854775807
-// Float	４バイトの浮動小数点	   6〜7桁
-// Double	８バイトの浮動小数点	   15〜16桁
+// String	文字列	                  "こんにちは"
+// Boolean	真 または 偽	             true または false
+// Char	    ２バイトの文字（Unicode）  'あ', 'X', 12354
+// Byte	    １バイトの整数	           -128〜127
+// Short	２バイトの整数	           -32768〜32767
+// Int	    ４バイトの整数			   -2147483648〜2147483647
+// Long	    ８バイトの整数			   -9223372036854775808〜9223372036854775807
+// Float	４バイトの浮動小数点	     6〜7桁
+// Double	８バイトの浮動小数点	     15〜16桁
 
 // 使いながら覚えていけば良いので、まずは以下の３つの型を少しだけ意識しておいてください。
 
@@ -83,3 +86,48 @@ val intNum = 2147483647
 val longNum = 1234567899999
 val floatNum = 123.45F
 val doubleNum = 12345.6789
+
+// 型が整数のときは、型を省略するとInt型になる
+var byteNum = 10
+var shortNum = 10
+var intNum = 10
+var longNum = 10
+
+// 値がInt型の範囲を超えている場合は、自動的にLong型になる
+var longNum = 1234567899999
+
+// 強制的にLong型にしたい場合は、値の最後にLをつける
+var longNum2 = 10L
+
+// 値が小数値のとき、型を省略するとDouble型になる
+var number = 123.45
+
+// Float型にしたい場合は、値の最後にFまたはfをつける
+// 大文字と小文字どちらで書いても良いが、プロジェクト内で統一するようにする
+var number = 123.45F
+
+// 変数は２行に分けて書けるが、その場合は型推論を使うことはできない
+var message: String
+message = "こんにちは" // 正しい
+
+var message
+message = "こんにちは" // 間違い
+
+fun main() {
+    val message: String = "Hello World!" // 必要のない型推論は消す
+    println(message)
+}
+
+// あらかじめ名前を変数にしておくことで、変更が必要になっても１箇所書き換えるだけで済む
+fun main() {
+    println("こんにちは、山田さん！")
+    println("山田さんのスコアは100です。")
+    println("山田さんはレベル10に到達しました。")
+}
+
+fun main() {
+    val playerName = "山田"
+    println("こんにちは、${playerName}さん！")
+    println("${playerName}さんのスコアは100です。")
+    println("${playerName}さんはレベル10に到達しました。")
+}
