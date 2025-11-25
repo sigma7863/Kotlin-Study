@@ -1,0 +1,316 @@
+回転アニメーションをつけよう
+最後の仕上げとして、画像の回転アニメーションを実装します。
+
+前回学んだ state と remember のように、Jetpack Compose では状態の保持が必要なので、アニメーションの書き方も少し工夫する必要があります。
+
+少し複雑に見えるかもしれませんが、今回紹介するコードを知っておくと「タップをしたらアイコンの角度を変える、画像を少し大きくする」といったアニメーションも簡単に実装できるようになります。
+
+アプリ開発をする上で役立つコードなのでぜひ挑戦してみてください！
+
+
+もくじ
+回転アニメーションをつけよう
+1. 回転角度の用意
+2. animateFloatAsState 関数
+targetValue パラメータ
+animationSpec パラメータ
+3. 回転角度の更新
+4. アニメーションをセット
+5. 動作確認①
+6. 回転が終わったら実行する処理
+7. 動作確認②
+8. 画像を戻すときのアニメーション
+9. 動作確認③
+10. ボタンの表示・非表示
+11. 動作確認④
+まとめ
+
+回転アニメーションをつけよう
+1. 回転角度の用意
+まずは回転させる角度を持っておく変数を用意します。
+
+51行目あたりにコードを追加します。
+
+@Composable
+fun AppScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        var btnTextId by remember { mutableIntStateOf(R.string.btn_text) }
+        var imgId by remember { mutableIntStateOf(R.drawable.omikuji) }
+        var imgRotation by remember { mutableFloatStateOf(0f) }
+
+        Text(
+            text = stringResource(R.string.title),
+
+
+回転角度は Float 型にする必要があるので mutableFloatStateOf() を使うのがポイントです。最初は回転していない状態なので初期値は 0f にしておきます。
+
+エラーになってしまう場合は、以下の import 文が追加されていることを確認しましょう。
+
+import androidx.compose.runtime.mutableFloatStateOf
+
+
+2. animateFloatAsState 関数
+Jetpack Compose ではアニメーションを簡単に実装できる関数がたくさん用意されていますが、ここではちょっとした変化をつける時に便利な animate~AsState 関数を紹介します。
+
+関数名の ~ 部分にはアニメーション（変化）させたい値、例えば画像サイズ Dp や色 Color などが用意されています。
+
+
+今回アニメーションをつける回転角度は Float 型の値 なので animateFloatAsState 関数を使ってコードを書いていきましょう。
+
+53 行目あたりにコードを追加します。
+
+@Composable
+fun AppScreen() {
+    Column(
+        // 省略
+    ) {
+        var btnTextId by remember { mutableIntStateOf(R.string.btn_text) }
+        var imgId by remember { mutableIntStateOf(R.drawable.omikuji) }
+        var imgRotation by remember { mutableFloatStateOf(0f) }
+
+        val animatedRotation by animateFloatAsState(
+            targetValue = imgRotation,
+            animationSpec = tween(durationMillis = 2000)
+        )
+
+        Text(
+            text = stringResource(R.string.title),
+
+
+変数 animatedRotation は、このあと変更しないので var ではなく val で定義することがポイントです。
+
+追加される import 文は１つです。
+
+import androidx.compose.animation.core.animateFloatAsState
+
+
+targetValue パラメータ
+animateFloatAsState 関数を使うときに必ず書くパラメータは targetValue です。
+
+targetValue はターゲット（対象）になる値という意味なので、アニメーションによって変化させる値 imgRotation を書きます。
+
+animateFloatAsState関数
+animationSpec パラメータ
+animationSpec はアニメーションの動きに関するパラメータです。
+
+animationSpec = tween(durationMillis = 2000)
+
+
+ここでは tween 関数 を使って、２秒間かけて動くアニメーションをつけています。
+
+tween は「〜の間」という意味の between の略です。
+
+他にも バネのような動きをする spring 関数 や段階的な動きをつける keyframes 関数 があります。
+
+
+duration は「間隔」という意味で、Mills が付いているのでミリ秒で指定することがわかります。
+
+１秒は1000ミリ秒なので、２秒間のアニメーションをつけるには 2000 にします。
+
+
+3. 回転角度の更新
+画像の回転角度はボタンをタップしたタイミングで変更します。
+
+おみくじ箱を逆さまにするので、imgRotation を 180f にします。
+
+
+おみくじの結果画像はアニメーションが終わってから表示するので、getReslut() はあとで他の場所に書きます。
+
+ただ２回目以降にボタンがタップされたときは結果画像が表示されている状態になるので、おみくじ箱の画像にもどしておく必要があります。
+
+imgId に R.drawable.omikuji をセットして、ボタンがタップされたタイミングでおみくじ箱に戻しておきましょう。
+
+
+78行目あたりのコードを追加・変更します。
+
+        Button(
+            onClick = {
+                btnTextId = R.string.btn_text_again
+                imgId = R.drawable.omikuji
+                imgRotation = 180f
+            }
+        ) {
+            Text(text = stringResource(btnTextId))
+        }
+
+
+4. アニメーションをセット
+画像にアニメーションをセットしましょう。
+
+72行目あたり Image コンポーザブルの modifier パラメータに .rotate(animatedRotation) を追加します。
+
+        Spacer(modifier = Modifier.height(60.dp))
+
+        Image(
+            painter = painterResource(imgId),
+            contentDescription = stringResource(R.string.img_desc),
+            modifier = Modifier.size(300.dp).rotate(animatedRotation)
+        )
+
+        Spacer(modifier = Modifier.height(60.dp))
+
+
+rotate メソッドに animatedRotation をセットしておくことで、回転角度 imgRotation の値が変わったときにアニメーションが始まります。
+
+アニメーションを使わずに単に画像を傾けたいときは rotate(45f) のように直接角度を書くこともできます。
+
+
+5. 動作確認①
+[占う] ボタンをタップして画像が回転するか確認してみましょう。
+
+
+回転アニメーション
+
+6. 回転が終わったら実行する処理
+次は回転アニメーションが終わったときに実行するコードです。
+
+「回転角度を 0f に戻して、結果画像を表示する」という処理を追加しましょう。
+
+
+62行目あたりにコードを追加します。
+
+LaunchedEffect と入力すると候補が出てくるので、(key1: Any?) { ... } を選択します。
+
+LaunchedEffect関数
+以下のようにコードを追加します。
+
+        val animatedRotation by animateFloatAsState(
+            targetValue = imgRotation,
+            animationSpec = tween(durationMillis = 2000)
+        )
+
+        LaunchedEffect(imgRotation) {
+        }
+
+        Text(
+            text = stringResource(R.string.title),
+
+
+追加される import 文は１つです。
+
+import androidx.compose.runtime.LaunchedEffect
+
+
+LaunchedEffect() には 「渡された値が変わったときに実行するコード」 を書くことができます。
+
+ここでは imgRotation を渡しているので、回転角度が変わったときに実行するコードを書くことができます。
+
+
+回転中の imgRotation は 180f になっているので、imgRotation が 180f ならという条件を使ってコードを書いていきましょう。
+
+        LaunchedEffect(imgRotation) {
+            if (imgRotation == 180f) {
+                delay(2000)
+                imgId = getResult()
+                imgRotation = 0f
+            }
+        }
+
+
+回転アニメーションは tween(durationMillis = 2000) と書いているので、２秒間かけて実行されます。
+
+回転が終わるまで画像が切り替わらないように delay(2000) で２秒間の待機時間を入れるのがポイントです。
+
+２秒間の待機が終わったら結果画像をセットして、回転角度を 0f に戻します。
+
+
+アニメーションの流れ
+delay: 「遅延、遅らせる」という意味。
+
+
+7. 動作確認②
+ここで動作を確認してみましょう。
+
+おみくじ箱の回転が終わってから結果画像に切り替われば成功です！
+
+
+回転アニメーション
+
+8. 画像を戻すときのアニメーション
+画像の回転を戻すときはアニメーションを行わないように修正しましょう。
+
+アニメーションを行わないと言っても画像の切り替えは必要なので、画像の回転を戻すときはアニメーションを０秒間で実行するようにコードを修正します。
+
+62 行目あたりの durationMillis の値を変更します。
+
+        val animatedRotation by animateFloatAsState(
+            targetValue = imgRotation,
+            animationSpec = tween(durationMillis = if (imgRotation == 180f) 2000 else 0)
+        )
+
+
+アニメーションの実行時間を
+
+imgRotation が 180f のときは 2000 ミリ秒
+それ以外は 0 ミリ秒
+としています。
+
+
+少し不思議な if - else 文の書き方をしていますが、以下のコードを１行にまとめています。
+
+Jetpack Compose ではよく使う書き方なので、少しずつ慣れていきましょう。
+
+durationMillis = if (imgRotation == 180f) {
+    2000
+} else {
+    0
+}
+
+
+9. 動作確認③
+回転が終わって imgRotation が 0 になると、アニメーションの実行時間 durationMillis も 0 になるので、回転せずに結果画像に切り替わります。
+
+
+回転アニメーション
+
+10. ボタンの表示・非表示
+最後は [占う] ボタンの表示・非表示の切り替えです。
+
+回転中だけ非表示にするので alpha 関数を使って透明度を設定します。
+
+        Button(
+            onClick = {
+                btnTextId = R.string.btn_text_again
+                imgId = R.drawable.omikuji
+                imgRotation = 180f
+            },
+            modifier = Modifier.alpha(if (imgRotation == 180f) 0f else 1f)
+        ) {
+            Text(text = stringResource(btnTextId))
+        }
+
+
+alpha は「透過度、透明度」を設定できて、0f（透明）から 1f（不透明）の Float 型で指定します。
+
+ここでも if - else 文を使って
+
+imgRotation が 180f のときは 0f
+それ以外は 1f
+としています。
+
+
+11. 動作確認④
+回転中はボタンが非表示になって、回転が終わると表示されるようになりました。
+
+
+回転アニメーション
+
+まとめ
+animateFloatAsState()
+Float 型の値にアニメーションをつける
+targetValue パラメータ（必須）
+アニメーションによって変化させる値
+animationSpec パラメータ
+動きに関する設定
+tween(): 実行時間を指定
+durationMillis: ミリ秒
+LaunchedEffect()
+渡された値が変わったときに実行するコード
+delay(): 待機時間を入れる
+alpha()
+透過度を設定
+0f（透明）〜1f（不透明）
